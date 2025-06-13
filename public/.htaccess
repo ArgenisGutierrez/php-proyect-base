@@ -1,0 +1,45 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # URLs amigables
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
+    
+    # Bloquear archivos ocultos
+    RewriteRule (^\.|/\.) - [F]
+</IfModule>
+
+# Protección de archivos sensibles
+<FilesMatch "\.(env|log|htaccess|sql|gitignore|md|ini|bak|swp|yml|key|config)$">
+    Require all denied
+</FilesMatch>
+
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header unset X-Powered-By
+    Header set Referrer-Policy "no-referrer-when-downgrade"
+</IfModule>
+
+# Configuración para desarrollo
+<IfModule mod_php.c>
+    php_flag display_errors on
+    php_flag display_startup_errors on
+    php_value error_reporting E_ALL
+</IfModule>
+
+# Deshabilitar métodos peligrosos
+<LimitExcept GET POST HEAD>
+    Require all denied
+</LimitExcept>
+
+# Prevenir directory listing
+Options -Indexes
+
+# Permitir acceso a recursos CORS (opcional para desarrollo)
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
