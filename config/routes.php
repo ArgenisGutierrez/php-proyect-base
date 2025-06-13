@@ -85,7 +85,7 @@ $dispatcher = (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'production' && f
 // Middleware para rutas API
 if (strpos($uri, '/api') === 0) {
   // Configuración segura de CORS
-  $allowedOrigins = ['http://miprojecto.local'];
+  $allowedOrigins = ['http://base.local'];
   $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
   if (in_array($origin, $allowedOrigins)) {
