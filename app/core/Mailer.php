@@ -63,7 +63,7 @@ class Mailer
 
   public function to($email, $name = '')
   {
-    if ($this->validateEmail($email)) {
+    if (!$this->validateEmail($email)) {
       throw new InvalidArgumentException("Dirección de correo inválida: $email");
     }
 
@@ -71,10 +71,9 @@ class Mailer
     return $this;
   }
 
-
   public function cc($email, $name = '')
   {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (!$this->validateEmail($email)) {
       throw new InvalidArgumentException("Dirección CC inválida: $email");
     }
 
@@ -84,7 +83,7 @@ class Mailer
 
   public function bcc($email, $name = '')
   {
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (!$this->validateEmail($email)) {
       throw new InvalidArgumentException("Dirección BCC inválida: $email");
     }
 
@@ -98,21 +97,38 @@ class Mailer
     return $this;
   }
 
-  public function template($template, $data = [])
+  public function body($content)
   {
-    $render = function ($file, $variables) {
-      ob_start();
-      // Solo definir variables específicas que necesites
-      foreach ($variables as $key => $value) {
-        if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
-          $$key = $value;
-        }
-      }
-      include $file;
-      return ob_get_clean();
-    };
+    $this->mailer->Body = $content;
+    return $this;
+  }
 
-    return $render($template, $data);
+  public function template($templateName, $data = [])
+  {
+    $templatePath = $this->templatePath . $templateName . '.php';
+
+    if (!file_exists($templatePath)) {
+      throw new \Exception("Template no encontrado: $templatePath");
+    }
+
+    $content = $this->renderTemplate($templatePath, $data);
+    $this->mailer->Body = $content;
+    return $this;
+  }
+
+  private function renderTemplate($templatePath, $data = [])
+  {
+    ob_start();
+
+    // Extraer variables del array de datos
+    foreach ($data as $key => $value) {
+      if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
+        $$key = $value;
+      }
+    }
+
+    include $templatePath;
+    return ob_get_clean();
   }
 
   public function attach($filePath, $name = '')
@@ -140,10 +156,14 @@ class Mailer
         } catch (Exception $e) {
           $attempts++;
           error_log("Error enviando email a $recipient: " . $this->mailer->ErrorInfo);
-          error_log("Intentando enviar el email nuevamente ($attempts/$maxRetries)...");
-          sleep(1);
+          if ($attempts < $maxRetries) {
+            error_log("Intentando enviar el email nuevamente ($attempts/$maxRetries)...");
+            sleep(1);
+          }
         }
       } while ($attempts < $maxRetries);
+
+      error_log("Falló el envío del email después de $maxRetries intentos");
       return false;
     } finally {
       $this->mailer->clearAddresses();
