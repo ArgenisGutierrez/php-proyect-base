@@ -13,14 +13,6 @@ $content = '
     </a>
 </div>
 
-<div class="info-box">
-    <p><strong>¿Prefieres usar un código?</strong> También puedes ingresar este código de verificación:</p>
-</div>
-
-<div class="code-box">
-    <div class="verification-code">' . htmlspecialchars($verification_code ?? '000000') . '</div>
-</div>
-
 <div class="warning-box">
     <p><strong>Importante:</strong> Este enlace expirará en ' . ($expiry_hours ?? 24) . ' horas por seguridad.</p>
 </div>

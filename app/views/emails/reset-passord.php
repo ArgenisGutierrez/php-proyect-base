@@ -13,12 +13,6 @@ $content = '
     </a>
 </div>
 
-<div class="info-box">
-    <p><strong>Datos de la solicitud:</strong></p>
-    <p>• Hora: ' . date('d/m/Y H:i:s') . '</p>
-    <p>• IP: ' . htmlspecialchars($user_ip ?? 'No disponible') . '</p>
-</div>
-
 <div class="warning-box">
     <p><strong>¡Importante!</strong> Este enlace expirará en ' . ($expiry_hours ?? 1) . ' hora(s) por tu seguridad.</p>
 </div>
